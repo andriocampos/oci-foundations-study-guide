@@ -9,12 +9,20 @@
 
 ## 🗺️ Visão Geral do Cronograma
 
-| # | Pilar | Tópicos Principais | Peso no Exame |
-|---|-------|-------------------|---------------|
-| 1 | **Conceitos de Nuvem e Arquitetura OCI** | Regiões, ADs, FDs, IAM, Compartments | ~20% |
-| 2 | **Serviços Principais do OCI** | Compute, VCN, Storage, Autonomous DB | ~35% |
-| 3 | **Segurança e Conformidade** | Responsabilidade Compartilhada, WAF, Vault, Identity Domains | ~20% |
-| 4 | **Preços, Faturamento e Suporte** | SLA, Billing, Budgets, Cost Analysis, Always Free | ~25% |
+| # | Pilar | Tópicos Principais | Peso no Exame | Status |
+|---|-------|-------------------|---------------|--------|
+| 1 | **Conceitos de Nuvem e Arquitetura OCI** | Regiões, ADs, FDs, IAM, Compartments | ~20% | ✅ Completo |
+| 2 | **Serviços Principais do OCI** | Compute, VCN, Storage, Autonomous DB | ~35% | ✅ Completo |
+| 3 | **Segurança e Conformidade** | Responsabilidade Compartilhada, WAF, Vault, Identity Domains | ~20% | 🔜 Em breve |
+| 4 | **Preços, Faturamento e Suporte** | SLA, Billing, Budgets, Cost Analysis, Always Free | ~25% | 🔜 Em breve |
+
+### 📂 Navegação dos Módulos
+
+| Módulo | Arquivo | Conteúdo |
+|--------|---------|----------|
+| Módulo 1 | [README.md](README.md) (abaixo) | Regions, ADs, FDs, IAM, Compartments, Always Free |
+| Módulo 2a | [modulo-02-servicos-principais.md](modulo-02-servicos-principais.md) | Compute Shapes + VCN/Networking |
+| Módulo 2b | [modulo-02-storage-database.md](modulo-02-storage-database.md) | Storage + Database + Simulado (6 questões) |
 
 ### Metodologia de Cada Módulo
 
@@ -23,7 +31,7 @@ Cada tópico segue obrigatoriamente 3 partes:
 ```
 [TEORIA]     → Conceito-chave alinhado à documentação oficial Oracle
 [PRÁTICA & CUSTO] → Cenários reais de precificação (Always Free vs. Produção)
-[SIMULADO]   → 2 questões no formato exato do exame oficial
+[SIMULADO]   → Questões no formato exato do exame oficial
 ```
 
 ---
@@ -408,18 +416,6 @@ O **Always Free Tier** oferece recursos que **nunca expiram**, disponíveis para
 - Esse é um **diferencial competitivo** cobrado frequentemente no exame.
 
 </details>
-
----
-
-## ⏭️ Próximo Módulo
-
-**Módulo 2 — Pilar 2: Serviços Principais do OCI**
-- Compute Shapes (VM, BM, Dedicated Host)
-- Virtual Cloud Network (VCN, Subnets, Gateways)
-- Storage (Object, Block, File, Archive)
-- Autonomous Database
-
-> 💬 **Aguardando seu comando para prosseguir para o Módulo 2.**
 
 ---
 

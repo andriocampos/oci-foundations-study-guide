@@ -103,80 +103,205 @@
 
 ### 2.1.4 GPU Shapes
 
-**Conceito:** Instâncias com aceleradores NVIDIA para AI/ML, HPC e inferência.
-
 | Shape | GPUs | Tipo GPU | OCPUs | RAM | $/hora | $/mês |
 |-------|------|----------|-------|-----|--------|-------|
 | BM.GPU.A10.4 | 4 | NVIDIA A10 | 64 | 1.024 GB | $2,95 | ~$2.154 |
 | BM.GPU.A100-v2.8 | 8 | NVIDIA A100 80GB | 128 | 2.048 GB | $17,00 | ~$12.410 |
 | BM.GPU.H100.8 | 8 | NVIDIA H100 80GB | 112 | 2.048 GB | $36,00 | ~$26.280 |
 
-**Casos de uso por GPU:**
-
-| GPU | Uso Principal |
-|-----|--------------|
-| A10 | Inferência, rendering, workloads gráficos |
-| A100 | Treinamento de modelos grandes, HPC |
-| H100 | LLMs, treinamento de última geração, GenAI |
-
 ---
 
 ### 2.1.5 Preemptible Instances e Capacity Reservations
 
-**Preemptible (Preemptíveis):**
-- **50% de desconto** sobre o preço regular
-- Podem ser **reclamadas pela OCI** com aviso de 30 segundos
-- Ideais para: batch processing, CI/CD, workloads tolerantes a falha
-- **NÃO** têm SLA de disponibilidade
-
-**Capacity Reservations:**
-- Reserva capacidade dedicada em um AD/FD específico
-- Garante disponibilidade para **scale-out planejado**
-- Cobrado mesmo se não utilizado (pay for reserved, not used)
-
-**Burstable Instances:**
-- Baseline CPU de 12.5% ou 50% (shapes E3/E4 Micro)
-- Pode "burst" para 100% por períodos curtos
-- Ideal para workloads com picos esporádicos
+| Recurso | Benefício | Consideração |
+|---------|-----------|--------------|
+| **Preemptible** | 50% desconto | Pode ser reclamada com 30s de aviso |
+| **Capacity Reservation** | Garante disponibilidade | Paga mesmo sem usar |
+| **Burstable** | Baseline CPU 12.5%/50% | Bursts temporários para 100% |
 
 ---
 
-### [PRÁTICA & CUSTO]
+### [PRÁTICA & CUSTO — Compute]
 
-**Cenário 1 — Aplicação Web Pequena (Always Free):**
+**Cenário 1 — Always Free:**
 
 | Recurso | Configuração | Custo |
 |---------|-------------|-------|
-| VM.Standard.A1.Flex | 4 OCPUs, 24 GB RAM | **$0 (Always Free)** |
-| Boot Volume | 47 GB | **$0 (dentro dos 200 GB free)** |
-| **Total mensal** | | **$0** |
+| VM.Standard.A1.Flex | 4 OCPUs, 24 GB RAM | **$0** |
 
-**Cenário 2 — API Server Produção (E5 Flex):**
+**Cenário 2 — API Server Produção (E5 Flex, 4 OCPU, 32 GB):**
 
-| Recurso | Configuração | Custo/mês |
-|---------|-------------|-----------|
-| VM.Standard.E5.Flex | 4 OCPUs, 32 GB RAM | |
-| → OCPUs | 4 × $0,030 × 730h | $87,60 |
-| → Memória | 32 × $0,002 × 730h | $46,72 |
-| Block Volume (500 GB) | Balanced tier | $12,75 |
-| **Total mensal** | | **$147,07** |
+| Item | Cálculo | Custo/mês |
+|------|---------|-----------|
+| OCPUs | 4 × $0,030 × 730h | $87,60 |
+| Memória | 32 × $0,002 × 730h | $46,72 |
+| **Total** | | **$134,32** |
 
-**Cenário 3 — ML Training (GPU H100):**
+**Cenário 3 — GPU H100 (ML Training, 8h/dia × 20 dias):**
 
-| Recurso | Configuração | Custo/mês |
-|---------|-------------|-----------|
-| BM.GPU.H100.8 | 8× H100, 112 OCPUs | $26.280,00 |
-| Block Volume (2 TB) | High Performance | $85,00 |
-| **Total mensal (24/7)** | | **$26.365,00** |
-| **Total (8h/dia, 20 dias)** | 160h × $36 | **$5.760,00** |
+| Item | Cálculo | Custo/mês |
+|------|---------|-----------|
+| BM.GPU.H100.8 | 160h × $36,00 | **$5.760,00** |
+| vs 24/7 | 730h × $36,00 | $26.280,00 |
+| **Economia** | | **78%** |
 
-> 💡 **Dica de economia:** Para ML training, desligue instâncias GPU quando não estiver treinando. 160h vs 730h = **78% de economia**.
+---
 
-**Always Free Compute:**
+---
 
-| Shape | Configuração Gratuita |
-|-------|----------------------|
-| VM.Standard.A1.Flex (ARM) | 4 OCPUs + 24 GB (divisível em até 4 VMs) |
-| VM.Standard.E4.Flex (AMD) | 1/8 OCPU + 1 GB (Micro instance) |
+## 2.2 Virtual Cloud Network (VCN)
+
+### [TEORIA]
+
+**Definição Oficial:** Uma Virtual Cloud Network (VCN) é uma rede privada definida por software que você configura no OCI. Ela se assemelha a uma rede de data center tradicional, com regras de firewall e tipos específicos de gateways de comunicação.
+
+---
+
+### 2.2.1 Componentes da VCN (Todos cobrados no exame!)
+
+| Componente | Descrição | Custo |
+|------------|-----------|-------|
+| **VCN** | Rede virtual (CIDR block, ex: 10.0.0.0/16) | **FREE** |
+| **Subnet** | Subdivisão da VCN (pública ou privada) | **FREE** |
+| **Route Table** | Regras de roteamento de tráfego | **FREE** |
+| **Security List** | Firewall stateful no nível da subnet | **FREE** |
+| **NSG (Network Security Group)** | Firewall no nível da VNIC (mais granular) | **FREE** |
+| **Internet Gateway** | Acesso bidirecional à internet (public subnet) | **FREE** |
+| **NAT Gateway** | Acesso unidirecional à internet (private subnet → internet) | $8,25/mês |
+| **Service Gateway** | Acesso privado a OCI services (sem internet) | **FREE** |
+| **DRG (Dynamic Routing Gateway)** | Conecta VCN a on-premises ou peering | **FREE** |
+| **Local Peering Gateway (LPG)** | Conecta VCNs na mesma região | **FREE** |
+| **Remote Peering** | Conecta VCNs em regiões diferentes (via DRG) | **FREE** |
+
+---
+
+### 2.2.2 Subnets — Pública vs Privada
+
+| Tipo | Acesso Internet | Uso Típico |
+|------|----------------|------------|
+| **Pública** | Sim (via Internet Gateway) | Web servers, bastion hosts |
+| **Privada** | Não direto (via NAT Gateway para saída) | Databases, app servers, backends |
+
+**Escopo da Subnet:**
+- **Regional** (recomendado): span all ADs na região
+- **AD-specific** (legacy): limitada a um Availability Domain
+
+> 💡 **Para a prova:** Subnets regionais são a **recomendação atual**. Permitem alta disponibilidade sem criar subnet por AD.
+
+---
+
+### 2.2.3 Security Lists vs Network Security Groups (NSG)
+
+| Aspecto | Security List | NSG |
+|---------|--------------|-----|
+| Nível | **Subnet** (todas as VNICs) | **VNIC** (instância específica) |
+| Granularidade | Menor | **Maior** (recomendado) |
+| Associação | 1 subnet → múltiplas SLs | 1 VNIC → até 5 NSGs |
+| Regras | Ingress + Egress | Ingress + Egress |
+| Stateful | Sim (default) | Sim (default) |
+
+> 💡 **Para a prova:** Oracle **recomenda NSGs** sobre Security Lists para controle mais granular.
+
+---
+
+### 2.2.4 Gateways — Qual usar e quando
+
+```
+Internet (público)
+    │
+    ▼
+┌─────────────────┐
+│ Internet Gateway │ ← para subnets PÚBLICAS
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    │   VCN   │
+    └────┬────┘
+         │
+┌────────┴────────┐
+│  NAT Gateway    │ ← subnet privada → internet (só saída)
+└─────────────────┘
+         │
+┌────────┴────────┐
+│ Service Gateway │ ← subnet privada → OCI Services (sem internet)
+└─────────────────┘
+         │
+┌────────┴────────┐
+│      DRG        │ ← VCN ↔ On-premises (VPN/FastConnect)
+└─────────────────┘
+```
+
+**Tabela de decisão (frequente no exame):**
+
+| Cenário | Gateway |
+|---------|---------|
+| Web server acessível pela internet | **Internet Gateway** |
+| DB server precisa baixar patches da internet | **NAT Gateway** |
+| App server acessa Object Storage sem internet | **Service Gateway** |
+| Conexão com data center on-premises | **DRG + VPN ou FastConnect** |
+| Conectar duas VCNs na mesma região | **Local Peering Gateway (LPG)** |
+| Conectar duas VCNs em regiões diferentes | **DRG + Remote Peering** |
+
+---
+
+### 2.2.5 Load Balancers
+
+| Tipo | Camada | Protocolos | Custo |
+|------|--------|-----------|-------|
+| **Network Load Balancer** | Layer 4 | TCP/UDP | **FREE** |
+| **Flexible Load Balancer** | Layer 7 | HTTP/HTTPS | $8,25/mês + bandwidth |
+
+**Flexible Load Balancer — Detalhes:**
+- Base: $0,0113/hora (~$8,25/mês)
+- Bandwidth: $0,0001/Mbps/hora ($7,30/mês para 100 Mbps)
+- **Always Free:** 1 instância + 10 Mbps
+
+**Network Load Balancer:**
+- **100% gratuito** (sem cobrança por instância ou dados)
+- Ideal para tráfego TCP/UDP de alta performance
+- Suporta milhões de conexões simultâneas
+
+> 💡 **Dica de prova:** NLB é GRATUITO e opera em Layer 4. Flex LB opera em Layer 7 (HTTP/HTTPS) e tem custo. O exame testa essa diferença.
+
+---
+
+### 2.2.6 Conectividade Híbrida
+
+| Serviço | Bandwidth | Custo/mês | Uso |
+|---------|-----------|-----------|-----|
+| **Site-to-Site VPN** | Até 250 Mbps | $18,25 | Conexão criptografada básica |
+| **FastConnect 1 Gbps** | 1 Gbps dedicado | $219 | Produção, latência previsível |
+| **FastConnect 10 Gbps** | 10 Gbps dedicado | $496 | Alta demanda |
+| **FastConnect 100 Gbps** | 100 Gbps dedicado | $3.723 | Data centers massivos |
+
+**FastConnect vs VPN:**
+
+| Aspecto | VPN | FastConnect |
+|---------|-----|-------------|
+| Tipo | Internet (criptografado) | Dedicado (privado) |
+| Latência | Variável | **Consistente e baixa** |
+| Bandwidth | Até 250 Mbps | 1–100 Gbps |
+| Custo | $18/mês | $219–$3.723/mês |
+| SLA | Sem SLA de latência | **SLA de latência** |
+
+---
+
+### [PRÁTICA & CUSTO — VCN]
+
+**Cenário — Arquitetura Web 3-Tier:**
+
+| Componente | Custo/mês |
+|------------|-----------|
+| 1 VCN (10.0.0.0/16) | **$0** |
+| 3 Subnets (public + 2 private) | **$0** |
+| 1 Internet Gateway | **$0** |
+| 1 NAT Gateway | $8,25 |
+| 1 Service Gateway | **$0** |
+| 1 Network Load Balancer (L4) | **$0** |
+| Route Tables + Security Lists | **$0** |
+| Egress (5 TB/mês) | **$0** (dentro do free tier) |
+| **Total Networking** | **$8,25/mês** |
+
+> 💡 **Para a prova:** Uma arquitetura VCN completa com LB pode custar apenas **$8,25/mês** (só o NAT Gateway). Quase tudo é gratuito!
 
 ---
